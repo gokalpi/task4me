@@ -1,30 +1,208 @@
 service:
   name: task4me
-# app and org for use with dashboard.serverless.com
-#app: your-app-name
-#org: your-org-name
+
+plugins:
+  - serverless-webpack
+  - serverless-reqvalidator-plugin
+  - serverless-aws-documentation
+  - serverless-plugin-canary-deployments
+  - serverless-iam-roles-per-function
+  - serverless-dynamodb-local
+  - serverless-offline
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'eu-central-1'}
+
+  apiGateway:
+    minimumCompressionSize: 1024 # Enable gzip compression for responses > 1 KB
+
+  tracing:
+    lambda: true
+    apiGateway: true
+
+  environment:
+    PROJECTS_TABLE: Task4Me-Projects-${self:provider.stage}
+    TASKS_TABLE: Task4Me-Tasks-${self:provider.stage}
+    PROJECTID_USERID_INDEX: ProjectIdUserIdIndex
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - xray:PutTelemetryRecords
+        - xray:PutTraceSegments
+      Resource: "*"
 
 custom:
   webpack:
     webpackConfig: ./webpack.config.js
     includeModules: true
+    
+  serverless-offline:
+    port: 3003
+  
+  dynamodb:
+    start:
+      port: 8000
+      inMemory: true
+      migrate: true
+    stages:
+      - ${self:provider.stage}
 
-# Add the serverless-webpack plugin
-plugins:
-  - serverless-webpack
-
-provider:
-  name: aws
-  runtime: nodejs12.x
-  apiGateway:
-    minimumCompressionSize: 1024 # Enable gzip compression for responses > 1 KB
-  environment:
-    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+  documentation:
+    api:
+      info:
+        version: v1.0.0
+        title: Task4Me API
+        description: Serverless application for project and task management
+    models:
+      - name: CreateProjectRequest
+        contentType: application/json
+        schema: ${file(models/create-project-request.json)}
+      - name: UpdateProjectRequest
+        contentType: application/json
+        schema: ${file(models/update-project-request.json)}
 
 functions:
-  hello:
-    handler: handler.hello
+
+  Auth:
+    handler: src/lambda/auth/auth0Authorizer.handler
+
+  GetAllProjects:
+    handler: src/lambda/http/projects/getAllProjects.handler
     events:
       - http:
           method: get
-          path: hello
+          path: projects
+          cors: true
+          authorizer: Auth
+          documentation:
+            summary: Getting all projects
+            description: Getting all projects
+    iamRoleStatementsInherit: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PROJECTS_TABLE}
+
+  CreateProject:
+    handler: src/lambda/http/projects/createProject.handler
+    events:
+      - http:
+          method: post
+          path: projects
+          cors: true
+          authorizer: Auth
+          reqValidatorName: RequestBodyValidator
+          documentation:
+            summary: Create a new project
+            description: Create a new project
+            requestModels:
+              'application/json': CreateProjectRequest
+    iamRoleStatementsInherit: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:PutItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PROJECTS_TABLE}
+
+  UpdateProject:
+    handler: src/lambda/http/projects/updateProject.handler
+    events:
+      - http:
+          method: patch
+          path: projects/{projectId}
+          cors: true
+          authorizer: Auth
+          reqValidatorName: RequestBodyValidator
+          documentation:
+            summary: Update project
+            description: Update project
+            requestModels:
+              'application/json': UpdateProjectRequest
+    iamRoleStatementsInherit: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:UpdateItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PROJECTS_TABLE}
+
+  DeleteProject:
+    handler: src/lambda/http/projects/deleteProject.handler
+    events:
+      - http:
+          method: delete
+          path: projects/{projectId}
+          cors: true
+          authorizer: Auth
+    iamRoleStatementsInherit: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:DeleteItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PROJECTS_TABLE}
+
+resources:
+  Resources:
+    GatewayResponseDefault4XX:
+      Type: AWS::ApiGateway::GatewayResponse
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+          gatewayresponse.header.Access-Control-Allow-Methods: "'GET,OPTIONS,POST'"
+        ResponseType: DEFAULT_4XX
+        RestApiId:
+          Ref: ApiGatewayRestApi
+
+    ProjectsDynamoDBTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        TableName: ${self:provider.environment.PROJECTS_TABLE}
+
+    TasksTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: projectId
+            AttributeType: S
+          - AttributeName: taskId
+            AttributeType: S
+          - AttributeName: userId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: projectId
+            KeyType: HASH
+          - AttributeName: taskId
+            KeyType: RANGE
+        BillingMode: PAY_PER_REQUEST
+        TableName: ${self:provider.environment.TASKS_TABLE}
+        LocalSecondaryIndexes:
+          - IndexName: ${self:provider.environment.PROJECTID_USERID_INDEX}
+            KeySchema:
+              - AttributeName: projectId
+                KeyType: HASH
+              - AttributeName: userId
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+
+    RequestBodyValidator:
+      Type: AWS::ApiGateway::RequestValidator
+      Properties:
+        Name: 'request-body-validator'
+        RestApiId:
+          Ref: ApiGatewayRestApi
+        ValidateRequestBody: true
+        ValidateRequestParameters: false
