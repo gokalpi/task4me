@@ -122,4 +122,20 @@ export class ProjectAccess {
       })
       .promise();
   }
+
+  async projectExists(id: string) {
+    console.log(`Checking if project with id ${id} exists`);
+
+    var params = {
+      TableName: this.projectsTable,
+      Key: {
+        id
+      }
+    };
+
+    const result = await this.docClient.get(params).promise();
+
+    console.log("Get project: ", result);
+    return !!result.Item;
+  }
 }

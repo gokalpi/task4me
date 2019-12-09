@@ -65,6 +65,12 @@ custom:
       - name: UpdateProjectRequest
         contentType: application/json
         schema: ${file(models/update-project-request.json)}
+      - name: CreateTaskRequest
+        contentType: application/json
+        schema: ${file(models/create-task-request.json)}
+      - name: UpdateTaskRequest
+        contentType: application/json
+        schema: ${file(models/update-task-request.json)}
 
 functions:
 
@@ -78,7 +84,7 @@ functions:
           method: get
           path: projects
           cors: true
-          authorizer: Auth
+          # authorizer: Auth
           documentation:
             summary: Getting all projects
             description: Getting all projects
@@ -86,7 +92,7 @@ functions:
     iamRoleStatements:
       - Effect: Allow
         Action:
-          - dynamodb:Query
+          - dynamodb:Scan
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PROJECTS_TABLE}
 
   CreateProject:
@@ -96,7 +102,7 @@ functions:
           method: post
           path: projects
           cors: true
-          authorizer: Auth
+          # authorizer: Auth
           reqValidatorName: RequestBodyValidator
           documentation:
             summary: Create a new project
@@ -114,10 +120,10 @@ functions:
     handler: src/lambda/http/projects/updateProject.handler
     events:
       - http:
-          method: patch
+          method: put
           path: projects/{projectId}
           cors: true
-          authorizer: Auth
+          # authorizer: Auth
           reqValidatorName: RequestBodyValidator
           documentation:
             summary: Update project
@@ -128,6 +134,7 @@ functions:
     iamRoleStatements:
       - Effect: Allow
         Action:
+          - dynamodb:GetItem
           - dynamodb:UpdateItem
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PROJECTS_TABLE}
 
@@ -138,13 +145,91 @@ functions:
           method: delete
           path: projects/{projectId}
           cors: true
-          authorizer: Auth
+          # authorizer: Auth
     iamRoleStatementsInherit: true
     iamRoleStatements:
       - Effect: Allow
         Action:
+          - dynamodb:GetItem
           - dynamodb:DeleteItem
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PROJECTS_TABLE}
+
+  GetAllTasks:
+    handler: src/lambda/http/tasks/getAllTasks.handler
+    events:
+      - http:
+          method: get
+          path: tasks
+          cors: true
+          # authorizer: Auth
+          documentation:
+            summary: Getting all tasks
+            description: Getting all tasks
+    iamRoleStatementsInherit: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Scan
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TASKS_TABLE}
+
+  CreateTask:
+    handler: src/lambda/http/tasks/createTask.handler
+    events:
+      - http:
+          method: post
+          path: tasks
+          cors: true
+          # authorizer: Auth
+          reqValidatorName: RequestBodyValidator
+          documentation:
+            summary: Create a new task
+            description: Create a new task
+            requestModels:
+              'application/json': CreateTaskRequest
+    iamRoleStatementsInherit: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:PutItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TASKS_TABLE}
+
+  UpdateTask:
+    handler: src/lambda/http/tasks/updateTask.handler
+    events:
+      - http:
+          method: put
+          path: tasks/{taskId}
+          cors: true
+          # authorizer: Auth
+          reqValidatorName: RequestBodyValidator
+          documentation:
+            summary: Update task
+            description: Update task
+            requestModels:
+              'application/json': UpdateTaskRequest
+    iamRoleStatementsInherit: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:GetItem
+          - dynamodb:UpdateItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TASKS_TABLE}
+
+  DeleteTask:
+    handler: src/lambda/http/tasks/deleteTask.handler
+    events:
+      - http:
+          method: delete
+          path: tasks/{taskId}
+          cors: true
+          # authorizer: Auth
+    iamRoleStatementsInherit: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:GetItem
+          - dynamodb:DeleteItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TASKS_TABLE}
 
 resources:
   Resources:

@@ -8,7 +8,7 @@ import { UpdateProjectRequest } from "../requests/UpdateProjectRequest";
 const projectAccess = new ProjectAccess();
 
 export async function getProjectById(id: string): Promise<Project> {
-  if (!id) throw new Error("No id found");
+  if (!!id) throw new Error("No id found");
 
   return await projectAccess.getProjectById(id);
 }
@@ -35,13 +35,19 @@ export async function updateProject(
   updateProjectRequest: UpdateProjectRequest,
   id: string
 ) {
-  if (!id) throw new Error("No id found");
+  if (!!id) throw new Error("No id found");
 
   await projectAccess.updateProject(id, updateProjectRequest);
 }
 
 export async function deleteProject(id: string) {
-  if (!id) throw new Error("No id found");
+  if (!!id) throw new Error("No id found");
 
   await projectAccess.deleteProject(id);
+}
+
+export async function projectExists(id: string): Promise<boolean> {
+  if (!!id) throw new Error("No id found");
+
+  return await projectAccess.projectExists(id);
 }

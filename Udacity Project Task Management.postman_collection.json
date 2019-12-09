@@ -56,7 +56,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"name\": \"Cloud migration\",\n\t\"dueDate\": \"Migration project for cloud applications\"\n}",
+							"raw": "{\n\t\"name\": \"Cloud migration\",\n\t\"description\": \"Migration project for cloud applications\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -100,7 +100,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"name\": \"Google cloud migration\",\n\t\"dueDate\": \"Migration project for google cloud applications\"\n}",
+							"raw": "{\n\t\"name\": \"Azure cloud migration\",\n\t\"description\": \"Migration project from google cloud applications\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -108,7 +108,7 @@
 							}
 						},
 						"url": {
-							"raw": "https://{{apiId}}.execute-api.{{regionId}}.amazonaws.com/dev/projects/1",
+							"raw": "https://{{apiId}}.execute-api.{{regionId}}.amazonaws.com/dev/projects/f2785227-114c-47e9-af16-db16bf750420",
 							"protocol": "https",
 							"host": [
 								"{{apiId}}",
@@ -120,7 +120,7 @@
 							"path": [
 								"dev",
 								"projects",
-								"1"
+								"f2785227-114c-47e9-af16-db16bf750420"
 							]
 						}
 					},
@@ -144,7 +144,7 @@
 							}
 						],
 						"url": {
-							"raw": "https://{{apiId}}.execute-api.{{regionId}}.amazonaws.com/dev/projects/1",
+							"raw": "https://{{apiId}}.execute-api.{{regionId}}.amazonaws.com/dev/projects/f2785227-114c-47e9-af16-db16bf750420",
 							"protocol": "https",
 							"host": [
 								"{{apiId}}",
@@ -156,7 +156,7 @@
 							"path": [
 								"dev",
 								"projects",
-								"1"
+								"f2785227-114c-47e9-af16-db16bf750420"
 							]
 						}
 					},
@@ -190,19 +190,19 @@
 	],
 	"variable": [
 		{
-			"id": "16639b01-5831-4ab9-b18b-3b2a0983c561",
+			"id": "87d3956d-ab10-4a3f-8f30-3b28a2279b34",
 			"key": "apiId",
 			"value": "",
 			"type": "string"
 		},
 		{
-			"id": "38d210a5-5368-4a98-90a0-194aab7ced35",
+			"id": "0d3a8f7a-737c-48a7-af46-e7d0a9a13ab1",
 			"key": "authToken",
 			"value": "",
 			"type": "string"
 		},
 		{
-			"id": "4c8175ad-efed-4fea-8f1c-252902ab5dd7",
+			"id": "ea2d764f-330d-44c2-9e5e-e7739b56fdb9",
 			"key": "regionId",
 			"value": "",
 			"type": "string"

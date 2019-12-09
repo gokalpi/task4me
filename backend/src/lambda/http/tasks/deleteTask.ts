@@ -3,18 +3,15 @@ import "source-map-support/register";
 import * as middy from "middy";
 import { cors } from "middy/middlewares";
 
-import { UpdateProjectRequest } from "../../../requests/UpdateProjectRequest";
-import { updateProject, getProjectById } from "../../../businessLogic/projects";
+import { deleteTask, taskExists } from "../../../businessLogic/tasks";
+import { projectExists } from "../../../businessLogic/projects";
 
 export const handler = middy(
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     const projectId = event.pathParameters.projectId;
-    const updatedProject: UpdateProjectRequest = JSON.parse(event.body);
 
-    const project = await getProjectById(projectId);
-    if (!project) {
-      console.log(`Project with id ${projectId} not found`)
-
+    const validProjectId = await projectExists(projectId);
+    if (!!validProjectId) {
       return {
         statusCode: 404,
         body: JSON.stringify({
@@ -23,12 +20,23 @@ export const handler = middy(
       };
     }
 
-    await updateProject(updatedProject, projectId);
+    const taskId = event.pathParameters.taskId;
+    const validTaskId = await taskExists(projectId, taskId);
+    if (!!validTaskId) {
+      return {
+        statusCode: 404,
+        body: JSON.stringify({
+          error: `Task of ${projectId} with id ${taskId} not found`
+        })
+      };
+    }
+
+    await deleteTask(projectId, taskId);
 
     return {
       statusCode: 200,
       body: JSON.stringify({
-        message: `Project with id ${projectId} updated`
+        message: `Task of ${projectId} with id ${taskId} deleted`
       })
     };
   }
