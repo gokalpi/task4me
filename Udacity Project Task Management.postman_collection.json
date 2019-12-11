@@ -190,19 +190,19 @@
 	],
 	"variable": [
 		{
-			"id": "87d3956d-ab10-4a3f-8f30-3b28a2279b34",
+			"id": "c1492d57-a722-478b-9076-02e16c2cd442",
 			"key": "apiId",
 			"value": "",
 			"type": "string"
 		},
 		{
-			"id": "0d3a8f7a-737c-48a7-af46-e7d0a9a13ab1",
+			"id": "dd6eb5bc-2361-4a89-b12b-90a21be02b28",
 			"key": "authToken",
 			"value": "",
 			"type": "string"
 		},
 		{
-			"id": "ea2d764f-330d-44c2-9e5e-e7739b56fdb9",
+			"id": "fd71b2e3-dcc7-447b-95da-487ad22e1c11",
 			"key": "regionId",
 			"value": "",
 			"type": "string"
