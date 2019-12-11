@@ -4,7 +4,10 @@ export interface Task {
   userId: string;
   name: string;
   dueDate: string;
-  createdAt: string;
   done: boolean;
+  createdAt: string;
+  createdBy: string;
+  modifiedAt?: string;
+  modifiedBy?: string;
   attachmentUrl?: string;
 }

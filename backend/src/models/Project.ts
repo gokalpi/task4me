@@ -3,4 +3,7 @@ export interface Project {
   name: string;
   description?: string;
   createdAt: string;
+  createdBy: string;
+  modifiedAt?: string;
+  modifiedBy?: string;
 }

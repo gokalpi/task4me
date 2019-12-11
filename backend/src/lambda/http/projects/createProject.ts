@@ -5,13 +5,16 @@ import { cors } from "middy/middlewares";
 
 import { CreateProjectRequest } from "../../../requests/CreateProjectRequest";
 import { createProject } from "../../../businessLogic/projects";
+import { getUserId } from "../../../auth/utils";
 
 export const handler = middy(
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     console.log("Creating project", event);
 
     const newProject: CreateProjectRequest = JSON.parse(event.body);
-    const newItem = await createProject(newProject);
+    const userId = getUserId(event);
+
+    const newItem = await createProject(newProject, userId);
 
     return {
       statusCode: 201,

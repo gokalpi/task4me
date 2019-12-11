@@ -3,16 +3,13 @@
   "title": "task",
   "type": "object",
   "properties": {
-    "projectId": {
-      "type": "string"
-    },
     "name": {
       "type": "string"
     },
-    "description": {
+    "dueDate": {
       "type": "string"
     }
   },
-  "required": ["projectId", "name"],
+  "required": ["name", "dueDate"],
   "additionalProperties": false
 }

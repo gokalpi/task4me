@@ -3,14 +3,15 @@ import "source-map-support/register";
 import * as middy from "middy";
 import { cors } from "middy/middlewares";
 
-import { deleteProject, getProjectById } from "../../../businessLogic/projects";
+import { deleteProject, projectExists } from "../../../businessLogic/projects";
 
 export const handler = middy(
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+    console.log("Deleting project", event);
     const projectId = event.pathParameters.projectId;
 
-    const project = await getProjectById(projectId);
-    if (!project) {
+    const validProject = await projectExists(projectId);
+    if (!validProject) {
       console.log(`Project with id ${projectId} not found`)
 
       return {

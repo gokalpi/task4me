@@ -4,15 +4,19 @@ import * as middy from "middy";
 import { cors } from "middy/middlewares";
 
 import { UpdateProjectRequest } from "../../../requests/UpdateProjectRequest";
-import { updateProject, getProjectById } from "../../../businessLogic/projects";
+import { updateProject, projectExists } from "../../../businessLogic/projects";
+import { getUserId } from "../../../auth/utils";
 
 export const handler = middy(
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+    console.log("Updating project", event);
+
     const projectId = event.pathParameters.projectId;
     const updatedProject: UpdateProjectRequest = JSON.parse(event.body);
+    const userId = getUserId(event);
 
-    const project = await getProjectById(projectId);
-    if (!project) {
+    const validProject = await projectExists(projectId);
+    if (!validProject) {
       console.log(`Project with id ${projectId} not found`)
 
       return {
@@ -23,7 +27,7 @@ export const handler = middy(
       };
     }
 
-    await updateProject(updatedProject, projectId);
+    await updateProject(updatedProject, projectId, userId);
 
     return {
       statusCode: 200,

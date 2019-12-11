@@ -11,8 +11,8 @@ export async function getTaskById(
   projectId: string,
   taskId: string
 ): Promise<Task> {
-  if (!!projectId) throw new Error("No projectId found");
-  if (!!taskId) throw new Error("No taskId found");
+  if (!projectId) throw new Error("No projectId found");
+  if (!taskId) throw new Error("No taskId found");
 
   return await taskAccess.getTaskById(projectId, taskId);
 }
@@ -22,15 +22,24 @@ export async function getAllTasksByProject(projectId: string) {
 }
 
 export async function createTask(
-  createTaskRequest: CreateTaskRequest
+  createTaskRequest: CreateTaskRequest,
+  projectId: string,
+  userId: string
 ): Promise<Task> {
+  if (!projectId) throw new Error("No projectId found");
+  if (!userId) throw new Error("No userId found");
+
   const newTask = {
-    id: uuid.v4(),
+    projectId,
+    taskId: uuid.v4(),
+    userId,
     ...createTaskRequest,
-    createdAt: new Date().toISOString()
+    done: false,
+    createdAt: new Date().toISOString(),
+    createdBy: userId
   };
 
-  await taskAccess.createTask(newTask);
+  await taskAccess.createTask(projectId, newTask);
 
   return newTask;
 }
@@ -38,17 +47,18 @@ export async function createTask(
 export async function updateTask(
   updateTaskRequest: UpdateTaskRequest,
   projectId: string,
-  taskId: string
+  taskId: string,
+  userId: string
 ) {
-  if (!!projectId) throw new Error("No projectId found");
-  if (!!taskId) throw new Error("No taskId found");
+  if (!projectId) throw new Error("No projectId found");
+  if (!taskId) throw new Error("No taskId found");
 
-  await taskAccess.updateTask(projectId, taskId, updateTaskRequest);
+  await taskAccess.updateTask(projectId, taskId, userId, updateTaskRequest);
 }
 
 export async function deleteTask(projectId: string, taskId: string) {
-  if (!!projectId) throw new Error("No projectId found");
-  if (!!taskId) throw new Error("No taskId found");
+  if (!projectId) throw new Error("No projectId found");
+  if (!taskId) throw new Error("No taskId found");
 
   await taskAccess.deleteTask(projectId, taskId);
 }
@@ -57,8 +67,8 @@ export async function taskExists(
   projectId: string,
   taskId: string
 ): Promise<boolean> {
-  if (!!projectId) throw new Error("No projectId found");
-  if (!!taskId) throw new Error("No taskId found");
+  if (!projectId) throw new Error("No projectId found");
+  if (!taskId) throw new Error("No taskId found");
 
   return await taskAccess.taskExists(projectId, taskId);
 }

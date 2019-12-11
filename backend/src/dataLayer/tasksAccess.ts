@@ -8,7 +8,7 @@ export class TaskAccess {
   constructor(
     private readonly docClient: DocumentClient = createDynamoDBClient(),
     private readonly tasksTable = process.env.TASKS_TABLE
-  ) {}
+  ) { }
 
   async getTaskById(projectId: string, taskId: string): Promise<Task> {
     console.log(`Getting task of project ${projectId} with id ${taskId}`);
@@ -43,8 +43,8 @@ export class TaskAccess {
     return result.Items as Task[];
   }
 
-  async createTask(task: Task) {
-    console.log(`Creating a task of project ${task.projectId} with id ${task.taskId}`);
+  async createTask(projectId: string, task: Task) {
+    console.log(`Creating a task of project ${projectId} with id ${task.taskId}`);
 
     var params = {
       TableName: this.tasksTable,
@@ -52,7 +52,7 @@ export class TaskAccess {
     };
 
     await this.docClient
-      .put(params, function(err, data) {
+      .put(params, function (err, data) {
         if (err) {
           console.error(
             "Unable to create task. Error JSON:",
@@ -65,7 +65,7 @@ export class TaskAccess {
       .promise();
   }
 
-  async updateTask(projectId: string, taskId: string, task: TaskUpdate) {
+  async updateTask(projectId: string, taskId: string, userId: string, task: TaskUpdate) {
     console.log(`Updating task of project ${projectId} with id ${taskId}`);
 
     var params = {
@@ -74,11 +74,13 @@ export class TaskAccess {
         projectId,
         taskId
       },
-      UpdateExpression: "SET #name = :name, dueDate = :dueDate, done = :done",
+      UpdateExpression: "SET #name = :name, dueDate = :dueDate, done = :done, modifiedAt = :modifiedAt, modifiedBy = :modifiedBy",
       ExpressionAttributeValues: {
         ":name": task.name,
         ":dueDate": task.dueDate,
-        ":done": task.done
+        ":done": task.done,
+        ":modifiedAt": new Date().toISOString(),
+        ":modifiedBy": userId
       },
       ExpressionAttributeNames: {
         "#name": "name"
@@ -86,7 +88,7 @@ export class TaskAccess {
     };
 
     await this.docClient
-      .update(params, function(err, data) {
+      .update(params, function (err, data) {
         if (err) {
           console.error(
             "Unable to update task. Error JSON:",
@@ -111,7 +113,7 @@ export class TaskAccess {
     };
 
     await this.docClient
-      .delete(params, function(err, data) {
+      .delete(params, function (err, data) {
         if (err) {
           console.error(
             "Unable to delete task. Error JSON:",

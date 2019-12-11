@@ -10,6 +10,9 @@ plugins:
   - serverless-dynamodb-local
   - serverless-offline
 
+# package:
+#   individually: true
+
 provider:
   name: aws
   runtime: nodejs12.x
@@ -84,7 +87,7 @@ functions:
           method: get
           path: projects
           cors: true
-          # authorizer: Auth
+          authorizer: Auth
           documentation:
             summary: Getting all projects
             description: Getting all projects
@@ -95,6 +98,21 @@ functions:
           - dynamodb:Scan
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PROJECTS_TABLE}
 
+  GetProject:
+    handler: src/lambda/http/projects/getProject.handler
+    events:
+      - http:
+          method: get
+          path: projects/{projectId}
+          cors: true
+          authorizer: Auth
+    iamRoleStatementsInherit: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:GetItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PROJECTS_TABLE}
+            
   CreateProject:
     handler: src/lambda/http/projects/createProject.handler
     events:
@@ -102,7 +120,7 @@ functions:
           method: post
           path: projects
           cors: true
-          # authorizer: Auth
+          authorizer: Auth
           reqValidatorName: RequestBodyValidator
           documentation:
             summary: Create a new project
@@ -123,7 +141,7 @@ functions:
           method: put
           path: projects/{projectId}
           cors: true
-          # authorizer: Auth
+          authorizer: Auth
           reqValidatorName: RequestBodyValidator
           documentation:
             summary: Update project
@@ -145,7 +163,7 @@ functions:
           method: delete
           path: projects/{projectId}
           cors: true
-          # authorizer: Auth
+          authorizer: Auth
     iamRoleStatementsInherit: true
     iamRoleStatements:
       - Effect: Allow
@@ -159,27 +177,46 @@ functions:
     events:
       - http:
           method: get
-          path: tasks
+          path: projects/{projectId}/tasks
           cors: true
-          # authorizer: Auth
+          authorizer: Auth
           documentation:
-            summary: Getting all tasks
-            description: Getting all tasks
+            summary: Getting all tasks of project
+            description: Getting all tasks of a project
     iamRoleStatementsInherit: true
     iamRoleStatements:
       - Effect: Allow
         Action:
-          - dynamodb:Scan
+          - dynamodb:GetItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PROJECTS_TABLE}
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TASKS_TABLE}
 
+  GetTask:
+    handler: src/lambda/http/tasks/getTask.handler
+    events:
+      - http:
+          method: get
+          path: projects/{projectId}/tasks/{taskId}
+          cors: true
+          authorizer: Auth
+    iamRoleStatementsInherit: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:GetItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TASKS_TABLE}
+      
   CreateTask:
     handler: src/lambda/http/tasks/createTask.handler
     events:
       - http:
           method: post
-          path: tasks
+          path: projects/{projectId}/tasks
           cors: true
-          # authorizer: Auth
+          authorizer: Auth
           reqValidatorName: RequestBodyValidator
           documentation:
             summary: Create a new task
@@ -190,6 +227,10 @@ functions:
     iamRoleStatements:
       - Effect: Allow
         Action:
+          - dynamodb:GetItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PROJECTS_TABLE}
+      - Effect: Allow
+        Action:
           - dynamodb:PutItem
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TASKS_TABLE}
 
@@ -198,9 +239,9 @@ functions:
     events:
       - http:
           method: put
-          path: tasks/{taskId}
+          path: projects/{projectId}/tasks/{taskId}
           cors: true
-          # authorizer: Auth
+          authorizer: Auth
           reqValidatorName: RequestBodyValidator
           documentation:
             summary: Update task
@@ -212,6 +253,10 @@ functions:
       - Effect: Allow
         Action:
           - dynamodb:GetItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PROJECTS_TABLE}
+      - Effect: Allow
+        Action:
+          - dynamodb:GetItem
           - dynamodb:UpdateItem
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TASKS_TABLE}
 
@@ -220,11 +265,15 @@ functions:
     events:
       - http:
           method: delete
-          path: tasks/{taskId}
+          path: projects/{projectId}/tasks/{taskId}
           cors: true
-          # authorizer: Auth
+          authorizer: Auth
     iamRoleStatementsInherit: true
     iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:GetItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PROJECTS_TABLE}
       - Effect: Allow
         Action:
           - dynamodb:GetItem
