@@ -27,7 +27,18 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
+}
+
+.ui.cards>.card>.content>.header:not(.ui) {
+  font-size: 1.1em;
+  font-weight: normal;
+}
+
+.ui.cards>.card .meta,
+.ui.card .meta {
+  font-size: 0.8em;
 }

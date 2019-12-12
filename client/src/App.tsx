@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
-import { Link, Route, Router, Switch } from 'react-router-dom'
-import { Grid, Menu, Segment } from 'semantic-ui-react'
+import { Route, Router, Switch, NavLink } from 'react-router-dom'
+import { Grid, Menu, Segment, Image } from 'semantic-ui-react'
 
 import Auth from './auth/Auth'
 import { EditProject } from './components/EditProject'
@@ -55,9 +55,10 @@ export default class App extends Component<AppProps, AppState> {
 
   generateMenu() {
     return (
-      <Menu>
-        <Menu.Item name="home">
-          <Link to="/">Home</Link>
+      <Menu fixed="top" inverted>
+        <Menu.Item header name="home" as={NavLink} to="/">
+              <Image size="mini" src="/logo192.png" style={{ marginRight: '1.5em'}} />
+              Task4Me
         </Menu.Item>
 
         <Menu.Menu position="right">{this.logInLogOutButton()}</Menu.Menu>

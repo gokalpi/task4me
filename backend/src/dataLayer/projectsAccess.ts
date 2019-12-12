@@ -37,7 +37,7 @@ export class ProjectAccess {
   }
 
   async createProject(project: Project) {
-    console.log(`Creating a project with id ${project.id}`);
+    console.log("Creating a project", project);
 
     var params = {
       TableName: this.projectsTable,
@@ -62,7 +62,7 @@ export class ProjectAccess {
   }
 
   async updateProject(id: string, userId: string, project: ProjectUpdate) {
-    console.log(`Updating project with id ${id}`);
+    console.log("Updating project", id, userId, project);
 
     var params = {
       TableName: this.projectsTable,

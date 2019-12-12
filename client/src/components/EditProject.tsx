@@ -1,13 +1,10 @@
-import * as React from 'react'
-import { Form, Button } from 'semantic-ui-react'
-import Auth from '../auth/Auth'
-import { getUploadUrl, uploadFile } from '../api/projects-api'
+import React from 'react'
+import { History } from "history";
+import { Form, Button, Input, Grid, Loader, Icon, Divider } from 'semantic-ui-react';
 
-enum UploadState {
-  NoUpload,
-  FetchingPresignedUrl,
-  UploadingFile,
-}
+import Auth from '../auth/Auth'
+import { Task } from '../types/Task'
+import { createTask, deleteTask, getTasks } from '../api/tasks-api'
 
 interface EditProjectProps {
   match: {
@@ -15,96 +12,162 @@ interface EditProjectProps {
       projectId: string
     }
   }
-  auth: Auth
+  auth: Auth;
+  history: History;
 }
 
 interface EditProjectState {
-  file: any
-  uploadState: UploadState
+  tasks: Task[];
+  newTaskName: string;
+  newDueDate: string;
+  loadingTasks: boolean;
 }
 
-export class EditProject extends React.PureComponent<
-  EditProjectProps,
-  EditProjectState
-> {
+export class EditProject extends React.PureComponent<EditProjectProps, EditProjectState> {
   state: EditProjectState = {
-    file: undefined,
-    uploadState: UploadState.NoUpload
+    tasks: [],
+    newTaskName: "",
+    newDueDate: "",
+    loadingTasks: true
   }
 
-  handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files
-    if (!files) return
+  handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({ newTaskName: event.target.value });
+  };
 
-    this.setState({
-      file: files[0]
-    })
-  }
+  handleDueDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({ newDueDate: event.target.value });
+  };
 
-  handleSubmit = async (event: React.SyntheticEvent) => {
-    event.preventDefault()
-
+  onTaskCreate = async () => {
     try {
-      if (!this.state.file) {
-        alert('File should be selected')
-        return
-      }
+      const newTask = await createTask(this.props.auth.getIdToken(),
+        this.props.match.params.projectId,
+        {
+          name: this.state.newTaskName,
+          dueDate: this.state.newDueDate
+        });
 
-      this.setUploadState(UploadState.FetchingPresignedUrl)
-      const uploadUrl = await getUploadUrl(this.props.auth.getIdToken(), this.props.match.params.projectId)
-
-      this.setUploadState(UploadState.UploadingFile)
-      await uploadFile(uploadUrl, this.state.file)
-
-      alert('File was uploaded!')
-    } catch (e) {
-      alert('Could not upload a file: ' + e.message)
-    } finally {
-      this.setUploadState(UploadState.NoUpload)
+      this.setState({
+        tasks: [...this.state.tasks, newTask],
+        newTaskName: "",
+        newDueDate: ""
+      });
+    } catch {
+      alert("Task creation failed");
     }
-  }
+  };
 
-  setUploadState(uploadState: UploadState) {
-    this.setState({
-      uploadState
-    })
+  onTaskDelete = async (taskId: string) => {
+    try {
+      await deleteTask(this.props.auth.getIdToken(), this.props.match.params.projectId, taskId);
+      this.setState({
+        tasks: this.state.tasks.filter(
+          task => task.taskId !== taskId
+        )
+      });
+    } catch {
+      alert("Task deletion failed");
+    }
+  };
+
+  async componentDidMount() {
+    try {
+      const tasks = await getTasks(this.props.auth.getIdToken(), this.props.match.params.projectId);
+      this.setState({
+        tasks,
+        loadingTasks: false
+      });
+    } catch (e) {
+      alert(`Failed to fetch tasks: ${e.message}`);
+    }
   }
 
   render() {
     return (
       <div>
-        <h1>Upload new image</h1>
+        <h1>Tasks</h1>
 
-        <Form onSubmit={this.handleSubmit}>
-          <Form.Field>
-            <label>File</label>
-            <input
-              type="file"
-              accept="image/*"
-              placeholder="Image to upload"
-              onChange={this.handleFileChange}
-            />
-          </Form.Field>
-
-          {this.renderButton()}
-        </Form>
-      </div>
+        <Grid>
+          <Grid.Row>
+            <Grid.Column width={16}>
+              {this.renderCreateTaskInput()}
+            </Grid.Column>
+          </Grid.Row>
+          <Grid.Row>
+            <Grid.Column width={16}>
+              {this.renderTasks()}
+            </Grid.Column>
+          </Grid.Row>
+        </Grid>
+    </div>
     )
   }
 
-  renderButton() {
-
+  renderCreateTaskInput() {
     return (
-      <div>
-        {this.state.uploadState === UploadState.FetchingPresignedUrl && <p>Uploading image metadata</p>}
-        {this.state.uploadState === UploadState.UploadingFile && <p>Uploading file</p>}
-        <Button
-          loading={this.state.uploadState !== UploadState.NoUpload}
-          type="submit"
-        >
-          Upload
-        </Button>
-      </div>
-    )
+      <Form>
+        <Form.Group widths="equal">
+          <Form.Field required>
+            <label>Name</label>
+            <Input fluid placeholder="Task name" onChange={this.handleNameChange} />
+          </Form.Field>
+          <Form.Field required>
+            <label>Due Date</label>
+            <Input fluid placeholder="Task Due Date" onChange={this.handleDueDateChange} />
+          </Form.Field>
+        </Form.Group>
+        <Form.Field control={Button} onClick={this.onTaskCreate}>Add Task</Form.Field>
+      </Form>
+    );
+  }
+
+  renderTasks() {
+    if (this.state.loadingTasks) {
+      return this.renderLoading();
+    }
+
+    return this.renderTasksList();
+  }
+
+  renderLoading() {
+    return (
+      <Grid.Row>
+        <Loader indeterminate active inline="centered">
+          Loading Tasks
+        </Loader>
+      </Grid.Row>
+    );
+  }
+
+  renderTasksList() {
+    return (
+      <Grid padded>
+        {this.state.tasks.map((task) => {
+          return (
+            <Grid.Row key={task.taskId}>
+              <Grid.Column width={10} verticalAlign="middle">
+                {task.name}
+              </Grid.Column>
+              <Grid.Column width={3} floated="right">
+                {task.dueDate}
+              </Grid.Column>
+              <Grid.Column width={1} floated="right">
+                <Button
+                  icon
+                  color="red"
+                  onClick={() => this.onTaskDelete(task.taskId)}
+                >
+                  <Icon name="delete" />
+                </Button>
+              </Grid.Column>
+              <Grid.Column width={16}>
+                <Divider />
+              </Grid.Column>
+            </Grid.Row>
+          );
+        })}
+      </Grid>
+    );
   }
 }
