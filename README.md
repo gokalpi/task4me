@@ -14,7 +14,7 @@ sls deploy -v
 ```
 This is the example page screenshot of deploy result
 
-![Alt text](images/deploy_success.PNG?raw=true "deploy_success")
+![](/images/serverless-deploy.jpg?raw=true "Serverless deployment result")
 
 ## Frontend
 
