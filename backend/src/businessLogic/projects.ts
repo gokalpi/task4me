@@ -18,12 +18,16 @@ export async function getAllProjects() {
 }
 
 export async function createProject(
-  createProjectRequest: CreateProjectRequest
+  createProjectRequest: CreateProjectRequest,
+  userId: string
 ): Promise<Project> {
+  if (!userId) throw new Error("No userId found");
+  
   const newProject = {
     id: uuid.v4(),
     ...createProjectRequest,
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    createdBy: userId
   };
 
   await projectAccess.createProject(newProject);
@@ -33,15 +37,23 @@ export async function createProject(
 
 export async function updateProject(
   updateProjectRequest: UpdateProjectRequest,
-  id: string
+  id: string,
+  userId: string
 ) {
   if (!id) throw new Error("No id found");
+  if (!userId) throw new Error("No userId found");
 
-  await projectAccess.updateProject(id, updateProjectRequest);
+  await projectAccess.updateProject(id, userId, updateProjectRequest);
 }
 
 export async function deleteProject(id: string) {
   if (!id) throw new Error("No id found");
 
   await projectAccess.deleteProject(id);
+}
+
+export async function projectExists(id: string): Promise<boolean> {
+  if (!id) throw new Error("No id found");
+
+  return await projectAccess.projectExists(id);
 }

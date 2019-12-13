@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "e9749c60-3c3b-4df6-b296-f9cf275508a3",
+		"_postman_id": "0f8aa815-5d74-41e7-946f-23adfb18f9f0",
 		"name": "Udacity Project Task Management",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -38,6 +38,36 @@
 					"response": []
 				},
 				{
+					"name": "Get project",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://{{apiId}}.execute-api.{{regionId}}.amazonaws.com/dev/projects/f2785227-114c-47e9-af16-db16bf750420",
+							"protocol": "https",
+							"host": [
+								"{{apiId}}",
+								"execute-api",
+								"{{regionId}}",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"dev",
+								"projects",
+								"f2785227-114c-47e9-af16-db16bf750420"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Create project",
 					"request": {
 						"method": "POST",
@@ -56,7 +86,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"name\": \"Cloud migration\",\n\t\"dueDate\": \"Migration project for cloud applications\"\n}",
+							"raw": "{\n\t\"name\": \"Test project 2\",\n\t\"description\": \"Test project 2\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -100,7 +130,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"name\": \"Google cloud migration\",\n\t\"dueDate\": \"Migration project for google cloud applications\"\n}",
+							"raw": "{\n\t\"name\": \"Test project 2 update\",\n\t\"description\": \"Test project 2 description update\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -108,7 +138,7 @@
 							}
 						},
 						"url": {
-							"raw": "https://{{apiId}}.execute-api.{{regionId}}.amazonaws.com/dev/projects/1",
+							"raw": "https://{{apiId}}.execute-api.{{regionId}}.amazonaws.com/dev/projects/17ea8047-5d97-49e1-827b-6dced7ee9bd4",
 							"protocol": "https",
 							"host": [
 								"{{apiId}}",
@@ -120,7 +150,7 @@
 							"path": [
 								"dev",
 								"projects",
-								"1"
+								"17ea8047-5d97-49e1-827b-6dced7ee9bd4"
 							]
 						}
 					},
@@ -144,7 +174,7 @@
 							}
 						],
 						"url": {
-							"raw": "https://{{apiId}}.execute-api.{{regionId}}.amazonaws.com/dev/projects/1",
+							"raw": "https://{{apiId}}.execute-api.{{regionId}}.amazonaws.com/dev/projects/17ea8047-5d97-49e1-827b-6dced7ee9bd4",
 							"protocol": "https",
 							"host": [
 								"{{apiId}}",
@@ -156,7 +186,207 @@
 							"path": [
 								"dev",
 								"projects",
-								"1"
+								"17ea8047-5d97-49e1-827b-6dced7ee9bd4"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Tasks",
+			"item": [
+				{
+					"name": "Get all tasks in a project",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://{{apiId}}.execute-api.{{regionId}}.amazonaws.com/dev/projects/710fc251-d0f9-4e6b-b80a-0627f4edc210/tasks",
+							"protocol": "https",
+							"host": [
+								"{{apiId}}",
+								"execute-api",
+								"{{regionId}}",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"dev",
+								"projects",
+								"710fc251-d0f9-4e6b-b80a-0627f4edc210",
+								"tasks"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get task",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://{{apiId}}.execute-api.{{regionId}}.amazonaws.com/dev/projects/710fc251-d0f9-4e6b-b80a-0627f4edc210/tasks/27a83608-1554-47cf-8bd8-b07484c7a466",
+							"protocol": "https",
+							"host": [
+								"{{apiId}}",
+								"execute-api",
+								"{{regionId}}",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"dev",
+								"projects",
+								"710fc251-d0f9-4e6b-b80a-0627f4edc210",
+								"tasks",
+								"27a83608-1554-47cf-8bd8-b07484c7a466"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create task",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"Planning\",\n\t\"dueDate\": \"2019-12-15T08:00:00.000Z\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://{{apiId}}.execute-api.{{regionId}}.amazonaws.com/dev/projects/710fc251-d0f9-4e6b-b80a-0627f4edc210/tasks",
+							"protocol": "https",
+							"host": [
+								"{{apiId}}",
+								"execute-api",
+								"{{regionId}}",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"dev",
+								"projects",
+								"710fc251-d0f9-4e6b-b80a-0627f4edc210",
+								"tasks"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update task",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"Migration planning\",\n\t\"dueDate\": \"2019-12-20T08:00:00.000Z\",\n\t\"done\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://{{apiId}}.execute-api.{{regionId}}.amazonaws.com/dev/projects/710fc251-d0f9-4e6b-b80a-0627f4edc210/tasks/27a83608-1554-47cf-8bd8-b07484c7a466",
+							"protocol": "https",
+							"host": [
+								"{{apiId}}",
+								"execute-api",
+								"{{regionId}}",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"dev",
+								"projects",
+								"710fc251-d0f9-4e6b-b80a-0627f4edc210",
+								"tasks",
+								"27a83608-1554-47cf-8bd8-b07484c7a466"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete task",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Bearer {{authToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "https://{{apiId}}.execute-api.{{regionId}}.amazonaws.com/dev/projects/710fc251-d0f9-4e6b-b80a-0627f4edc210/tasks/8600b068-6f25-4851-8e81-728627a71701",
+							"protocol": "https",
+							"host": [
+								"{{apiId}}",
+								"execute-api",
+								"{{regionId}}",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"dev",
+								"projects",
+								"710fc251-d0f9-4e6b-b80a-0627f4edc210",
+								"tasks",
+								"8600b068-6f25-4851-8e81-728627a71701"
 							]
 						}
 					},
@@ -190,21 +420,21 @@
 	],
 	"variable": [
 		{
-			"id": "16639b01-5831-4ab9-b18b-3b2a0983c561",
+			"id": "580f170e-a539-4b03-9347-fd25cac802a2",
 			"key": "apiId",
-			"value": "",
+			"value": "xbhf0fkrv7",
 			"type": "string"
 		},
 		{
-			"id": "38d210a5-5368-4a98-90a0-194aab7ced35",
+			"id": "936414d8-c35b-4412-a167-47295ed3781c",
 			"key": "authToken",
-			"value": "",
+			"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6Ik5UZEZNa0U1TjBVNVFUWTRRekF6UWpNeU1EZ3dNVVV5TlRneFJUY3lRMEkxUkVFeE9EazVNZyJ9.eyJpc3MiOiJodHRwczovL2Rldi1sc3V0dmd3eS5hdXRoMC5jb20vIiwic3ViIjoiYXV0aDB8NWRkZTQ2NTYwMzY0NjAwZDJlMmI5ZjgzIiwiYXVkIjoiQkJoVWYzMkJ4SHZORWpuUUhiQzlta1dEdlI4TWFJTDYiLCJpYXQiOjE1NzYwNTI1NjgsImV4cCI6MTU3NjA4ODU2OCwiYXRfaGFzaCI6IjZsQWllSEtFYlJ4NFJQeDlaV1Z3cVEiLCJub25jZSI6IklLZEgybmdtZzBPYjNPT1FxT2NoRzF2UE5EVDkySVp1In0.TOIp3tSbwGYVibeYtPyCu6gE521h4PaKiiRAAxfl5Mp1ZWJj5X5BGWGyYTxF5Heodvgh2nPUNWLvkRz9uT4G4PNeNMuhj-Viaz33RbmETcQ-ArSXawE4VZy7_c2sgJ2f90zRuWCkveDh-UEhzfN29BoTH5ItNSvbFgNK71DWabVvycP1gNDEiG6JqPrbxfbROATWb2v3iN9Hnq-nSaUekQxvhkRmMo_GKalkFwsxUlEr0sUvpaTEYL-YW-O5eP6leVMHzWZSWn3XNdZwK4h1mYvTcwxNrb8GNSFjsFbFlriFd5G1NxE4V5mip-ovlwrgZN3WM8fwTnBTFeDI31A-1A",
 			"type": "string"
 		},
 		{
-			"id": "4c8175ad-efed-4fea-8f1c-252902ab5dd7",
+			"id": "1b10589b-2dc2-478d-bb73-2fc0b7634cb3",
 			"key": "regionId",
-			"value": "",
+			"value": "eu-central-1",
 			"type": "string"
 		}
 	],

@@ -3,17 +3,14 @@ import "source-map-support/register";
 import * as middy from "middy";
 import { cors } from "middy/middlewares";
 
-import { UpdateProjectRequest } from "../../../requests/UpdateProjectRequest";
-import { updateProject, projectExists } from "../../../businessLogic/projects";
-import { getUserId } from "../../../auth/utils";
+import { getAllTasksByProject } from "../../../businessLogic/tasks";
+import { projectExists } from "../../../businessLogic/projects";
 
 export const handler = middy(
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-    console.log("Updating project", event);
+    console.log("Getting task of a project", event);
 
     const projectId = event.pathParameters.projectId;
-    const updatedProject: UpdateProjectRequest = JSON.parse(event.body);
-    const userId = getUserId(event);
 
     const validProject = await projectExists(projectId);
     if (!validProject) {
@@ -26,13 +23,13 @@ export const handler = middy(
         })
       };
     }
-
-    await updateProject(updatedProject, projectId, userId);
+    
+    const tasks = await getAllTasksByProject(projectId);
 
     return {
       statusCode: 200,
       body: JSON.stringify({
-        message: `Project with id ${projectId} updated`
+        items: tasks
       })
     };
   }

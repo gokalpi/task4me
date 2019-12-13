@@ -10,6 +10,9 @@ plugins:
   - serverless-dynamodb-local
   - serverless-offline
 
+package:
+  individually: true
+
 provider:
   name: aws
   runtime: nodejs12.x
@@ -28,6 +31,8 @@ provider:
     PROJECTS_TABLE: Task4Me-Projects-${self:provider.stage}
     TASKS_TABLE: Task4Me-Tasks-${self:provider.stage}
     PROJECTID_USERID_INDEX: ProjectIdUserIdIndex
+    IMAGES_S3_BUCKET: task4me-images-gokalpi-${self:provider.stage}
+    SIGNED_URL_EXPIRATION: 300
 
   iamRoleStatements:
     - Effect: Allow
@@ -65,6 +70,12 @@ custom:
       - name: UpdateProjectRequest
         contentType: application/json
         schema: ${file(models/update-project-request.json)}
+      - name: CreateTaskRequest
+        contentType: application/json
+        schema: ${file(models/create-task-request.json)}
+      - name: UpdateTaskRequest
+        contentType: application/json
+        schema: ${file(models/update-task-request.json)}
 
 functions:
 
@@ -86,9 +97,24 @@ functions:
     iamRoleStatements:
       - Effect: Allow
         Action:
-          - dynamodb:Query
+          - dynamodb:Scan
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PROJECTS_TABLE}
 
+  GetProject:
+    handler: src/lambda/http/projects/getProject.handler
+    events:
+      - http:
+          method: get
+          path: projects/{projectId}
+          cors: true
+          authorizer: Auth
+    iamRoleStatementsInherit: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:GetItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PROJECTS_TABLE}
+            
   CreateProject:
     handler: src/lambda/http/projects/createProject.handler
     events:
@@ -114,7 +140,7 @@ functions:
     handler: src/lambda/http/projects/updateProject.handler
     events:
       - http:
-          method: patch
+          method: put
           path: projects/{projectId}
           cors: true
           authorizer: Auth
@@ -128,6 +154,7 @@ functions:
     iamRoleStatements:
       - Effect: Allow
         Action:
+          - dynamodb:GetItem
           - dynamodb:UpdateItem
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PROJECTS_TABLE}
 
@@ -143,8 +170,141 @@ functions:
     iamRoleStatements:
       - Effect: Allow
         Action:
+          - dynamodb:GetItem
           - dynamodb:DeleteItem
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PROJECTS_TABLE}
+
+  GetAllTasks:
+    handler: src/lambda/http/tasks/getAllTasks.handler
+    events:
+      - http:
+          method: get
+          path: projects/{projectId}/tasks
+          cors: true
+          authorizer: Auth
+          documentation:
+            summary: Getting all tasks of project
+            description: Getting all tasks of a project
+    iamRoleStatementsInherit: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:GetItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PROJECTS_TABLE}
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TASKS_TABLE}
+
+  GetTask:
+    handler: src/lambda/http/tasks/getTask.handler
+    events:
+      - http:
+          method: get
+          path: projects/{projectId}/tasks/{taskId}
+          cors: true
+          authorizer: Auth
+    iamRoleStatementsInherit: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:GetItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TASKS_TABLE}
+      
+  CreateTask:
+    handler: src/lambda/http/tasks/createTask.handler
+    events:
+      - http:
+          method: post
+          path: projects/{projectId}/tasks
+          cors: true
+          authorizer: Auth
+          reqValidatorName: RequestBodyValidator
+          documentation:
+            summary: Create a new task
+            description: Create a new task
+            requestModels:
+              'application/json': CreateTaskRequest
+    iamRoleStatementsInherit: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:GetItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PROJECTS_TABLE}
+      - Effect: Allow
+        Action:
+          - dynamodb:PutItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TASKS_TABLE}
+
+  UpdateTask:
+    handler: src/lambda/http/tasks/updateTask.handler
+    events:
+      - http:
+          method: put
+          path: projects/{projectId}/tasks/{taskId}
+          cors: true
+          authorizer: Auth
+          reqValidatorName: RequestBodyValidator
+          documentation:
+            summary: Update task
+            description: Update task
+            requestModels:
+              'application/json': UpdateTaskRequest
+    iamRoleStatementsInherit: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:GetItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PROJECTS_TABLE}
+      - Effect: Allow
+        Action:
+          - dynamodb:GetItem
+          - dynamodb:UpdateItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TASKS_TABLE}
+
+  DeleteTask:
+    handler: src/lambda/http/tasks/deleteTask.handler
+    events:
+      - http:
+          method: delete
+          path: projects/{projectId}/tasks/{taskId}
+          cors: true
+          authorizer: Auth
+    iamRoleStatementsInherit: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:GetItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PROJECTS_TABLE}
+      - Effect: Allow
+        Action:
+          - dynamodb:GetItem
+          - dynamodb:DeleteItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TASKS_TABLE}
+
+  generateUrl:
+    handler: src/lambda/http/tasks/generateUrl.handler
+    events:
+      - http:
+          method: post
+          path: projects/{projectId}/tasks/{taskId}/attachment
+          cors: true
+          authorizer: Auth
+    iamRoleStatementsInherit: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:GetItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PROJECTS_TABLE}
+      - Effect: Allow
+        Action:
+          - dynamodb:GetItem
+          - dynamodb:UpdateItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TASKS_TABLE}
+      - Effect: Allow
+        Action:
+          - s3:PutObject
+        Resource: arn:aws:s3:::${self:provider.environment.IMAGES_S3_BUCKET}/*
 
 resources:
   Resources:
@@ -206,3 +366,36 @@ resources:
           Ref: ApiGatewayRestApi
         ValidateRequestBody: true
         ValidateRequestParameters: false
+
+    AttachmentsBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:provider.environment.IMAGES_S3_BUCKET}
+        CorsConfiguration:
+          CorsRules:
+            -
+              AllowedOrigins:
+                - '*'
+              AllowedHeaders:
+                - '*'
+              AllowedMethods:
+                - GET
+                - PUT
+                - POST
+                - DELETE
+                - HEAD
+              MaxAge: 3000
+
+    BucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        PolicyDocument:
+          Id: MyPolicy
+          Version: "2012-10-17"
+          Statement:
+            - Sid: PublicReadForGetBucketObjects
+              Effect: Allow
+              Principal: '*'
+              Action: 's3:GetObject'
+              Resource: 'arn:aws:s3:::${self:provider.environment.IMAGES_S3_BUCKET}/*'
+        Bucket: !Ref AttachmentsBucket
