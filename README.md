@@ -1,5 +1,6 @@
-# Cloud Capstone Project
+# Udacity Cloud Developer Capstone Project
 
+I have developed a project task management application. This repository has both serverless backend codes and React client typescript codes.
 
 # How to run the application
 
