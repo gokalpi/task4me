@@ -38,4 +38,4 @@ After you login successfully, projects are listed by using serverless lambda fun
 ![](/images/projects.jpg?raw=true "Projects")
 
 If you edit one of the projects, you can manage the tasks of this project and upload files to tasks.
-![](/images/tasks-in-a-project.jpg.jpg?raw=true "Projects")
+![](/images/tasks-in-a-project.jpg?raw=true "Tasks in a project")
