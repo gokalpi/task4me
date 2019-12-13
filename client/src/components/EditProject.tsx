@@ -1,10 +1,11 @@
 import React from 'react'
 import { History } from "history";
-import { Form, Button, Input, Grid, Loader, Icon, Divider } from 'semantic-ui-react';
+import update from 'immutability-helper'
+import { Form, Button, Input, Grid, Loader, Icon, Divider, Checkbox, Image } from 'semantic-ui-react';
 
 import Auth from '../auth/Auth'
 import { Task } from '../types/Task'
-import { createTask, deleteTask, getTasks } from '../api/tasks-api'
+import { createTask, deleteTask, getTasks, patchTask } from '../api/tasks-api'
 
 interface EditProjectProps {
   match: {
@@ -39,6 +40,10 @@ export class EditProject extends React.PureComponent<EditProjectProps, EditProje
     this.setState({ newDueDate: event.target.value });
   };
 
+  onEditButtonClick = (projectId: string, taskId: string) => {
+    this.props.history.push(`/projects/${projectId}/tasks/${taskId}/edit`)
+  }
+
   onTaskCreate = async () => {
     try {
       const newTask = await createTask(this.props.auth.getIdToken(),
@@ -70,6 +75,24 @@ export class EditProject extends React.PureComponent<EditProjectProps, EditProje
       alert("Task deletion failed");
     }
   };
+
+  onTaskCheck = async (pos: number) => {
+    try {
+      const task = this.state.tasks[pos]
+      await patchTask(this.props.auth.getIdToken(), task.projectId, task.taskId, {
+        name: task.name,
+        dueDate: task.dueDate,
+        done: !task.done
+      })
+      this.setState({
+        tasks: update(this.state.tasks, {
+          [pos]: { done: { $set: !task.done } }
+        })
+      })
+    } catch {
+      alert('Task status change failed')
+    }
+  }
 
   async componentDidMount() {
     try {
@@ -143,9 +166,15 @@ export class EditProject extends React.PureComponent<EditProjectProps, EditProje
   renderTasksList() {
     return (
       <Grid padded>
-        {this.state.tasks.map((task) => {
+        {this.state.tasks.map((task, pos) => {
           return (
             <Grid.Row key={task.taskId}>
+              <Grid.Column width={1} verticalAlign="middle">
+                <Checkbox
+                  onChange={() => this.onTaskCheck(pos)}
+                  checked={task.done}
+                />
+              </Grid.Column>
               <Grid.Column width={10} verticalAlign="middle">
                 {task.name}
               </Grid.Column>
@@ -153,14 +182,18 @@ export class EditProject extends React.PureComponent<EditProjectProps, EditProje
                 {task.dueDate}
               </Grid.Column>
               <Grid.Column width={1} floated="right">
-                <Button
-                  icon
-                  color="red"
-                  onClick={() => this.onTaskDelete(task.taskId)}
-                >
+                <Button icon color="blue" onClick={() => this.onEditButtonClick(task.projectId, task.taskId)}>
+                  <Icon name="pencil" />
+                </Button>
+              </Grid.Column>
+              <Grid.Column width={1} floated="right">
+                <Button icon color="red" onClick={() => this.onTaskDelete(task.taskId)}>
                   <Icon name="delete" />
                 </Button>
               </Grid.Column>
+              {task.attachmentUrl && (
+                <Image src={task.attachmentUrl} size="small" wrapped />
+              )}
               <Grid.Column width={16}>
                 <Divider />
               </Grid.Column>

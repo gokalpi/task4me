@@ -144,4 +144,28 @@ export class TaskAccess {
     console.log("Get task: ", result);
     return !!result.Item;
   }
+  
+  async updateAttachmentUrl(projectId: string, taskId: string, attachmentUrl: string) {
+    console.log(`Updating attachment URL of task of project ${projectId} with id ${taskId}`)
+
+    var params = {
+      TableName: this.tasksTable,
+      Key: {
+        projectId,
+        taskId
+      },
+      UpdateExpression: 'SET attachmentUrl = :attachmentUrl',
+      ExpressionAttributeValues: {
+        ':attachmentUrl': attachmentUrl
+      }
+    }
+
+    await this.docClient.update(params, function(err, data) {
+        if (err) {
+            console.error("Unable to update attachment Url. Error JSON:", JSON.stringify(err, null, 2));
+        } else {
+            console.log("updateAttachmentUrl succeeded:", JSON.stringify(data, null, 2));
+        }
+    }).promise()
+  }
 }

@@ -13,6 +13,7 @@ interface EditTaskProps {
   match: {
     params: {
       projectId: string
+      taskId: string
     }
   }
   auth: Auth
@@ -23,10 +24,7 @@ interface EditTaskState {
   uploadState: UploadState
 }
 
-export class EditTask extends React.PureComponent<
-  EditTaskProps,
-  EditTaskState
-> {
+export class EditTask extends React.PureComponent<EditTaskProps, EditTaskState> {
   state: EditTaskState = {
     file: undefined,
     uploadState: UploadState.NoUpload
@@ -51,7 +49,7 @@ export class EditTask extends React.PureComponent<
       }
 
       this.setUploadState(UploadState.FetchingPresignedUrl)
-      const uploadUrl = await getUploadUrl(this.props.auth.getIdToken(), this.props.match.params.projectId)
+      const uploadUrl = await getUploadUrl(this.props.auth.getIdToken(), this.props.match.params.projectId, this.props.match.params.taskId)
 
       this.setUploadState(UploadState.UploadingFile)
       await uploadFile(uploadUrl, this.state.file)

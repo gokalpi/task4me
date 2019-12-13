@@ -7,6 +7,7 @@ import { EditProject } from './components/EditProject'
 import { LogIn } from './components/LogIn'
 import { NotFound } from './components/NotFound'
 import { Projects } from './components/Projects'
+import { EditTask } from './components/EditTask'
 
 export interface AppProps {}
 
@@ -102,6 +103,14 @@ export default class App extends Component<AppProps, AppState> {
           exact
           render={props => {
             return <EditProject {...props} auth={this.props.auth} />
+          }}
+        />
+
+        <Route
+          path="/projects/:projectId/tasks/:taskId/edit"
+          exact
+          render={props => {
+            return <EditTask {...props} auth={this.props.auth} />
           }}
         />
 

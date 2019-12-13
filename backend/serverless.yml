@@ -31,7 +31,7 @@ provider:
     PROJECTS_TABLE: Task4Me-Projects-${self:provider.stage}
     TASKS_TABLE: Task4Me-Tasks-${self:provider.stage}
     PROJECTID_USERID_INDEX: ProjectIdUserIdIndex
-    IMAGES_S3_BUCKET: Task4Me-images-gokalpi-${self:provider.stage}
+    IMAGES_S3_BUCKET: task4me-images-gokalpi-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 300
 
   iamRoleStatements:
@@ -283,7 +283,7 @@ functions:
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TASKS_TABLE}
 
   generateUrl:
-    handler: src/lambda/http/generateUrl.handler
+    handler: src/lambda/http/tasks/generateUrl.handler
     events:
       - http:
           method: post
@@ -294,6 +294,11 @@ functions:
     iamRoleStatements:
       - Effect: Allow
         Action:
+          - dynamodb:GetItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PROJECTS_TABLE}
+      - Effect: Allow
+        Action:
+          - dynamodb:GetItem
           - dynamodb:UpdateItem
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TASKS_TABLE}
       - Effect: Allow

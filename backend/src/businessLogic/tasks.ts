@@ -4,6 +4,7 @@ import { Task } from "../models/Task";
 import { TaskAccess } from "../dataLayer/tasksAccess";
 import { CreateTaskRequest } from "../requests/CreateTaskRequest";
 import { UpdateTaskRequest } from "../requests/UpdateTaskRequest";
+import { getSignedUrl, getAttachmentUrl } from "../utils/s3Utils";
 
 const taskAccess = new TaskAccess();
 
@@ -71,4 +72,22 @@ export async function taskExists(
   if (!taskId) throw new Error("No taskId found");
 
   return await taskAccess.taskExists(projectId, taskId);
+}
+
+export async function generateAttachmentUrl(projectId: string, taskId: string) {
+  if (!projectId) throw new Error("No projectId found");
+  if (!taskId) throw new Error("No taskId found");
+
+  const signedUrl = await getSignedUrl(taskId);
+  console.log('Signed URL', signedUrl)
+  const downloadUrl = await getAttachmentUrl(taskId);
+  console.log('Download URL', downloadUrl)
+
+  await taskAccess.updateAttachmentUrl(
+    projectId,
+    taskId,
+    downloadUrl
+  );
+
+  return signedUrl;
 }
