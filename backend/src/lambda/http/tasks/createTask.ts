@@ -12,22 +12,20 @@ export const handler = middy(
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     console.log("Creating task", event);
 
+    const newTask: CreateTaskRequest = JSON.parse(event.body);
     const userId = getUserId(event);
-    const projectId = event.pathParameters.projectId;
 
-    const validProjectId = await projectExists(projectId);
+    const validProjectId = await projectExists(newTask.projectId);
     if (!validProjectId) {
       return {
         statusCode: 404,
         body: JSON.stringify({
-          error: `Project with id ${projectId} not found`
+          error: `Project with id ${newTask.projectId} not found`
         })
       };
     }
 
-    const newTask: CreateTaskRequest = JSON.parse(event.body);
-
-    const newItem = await createTask(newTask, projectId, userId);
+    const newItem = await createTask(newTask, userId);
 
     return {
       statusCode: 201,

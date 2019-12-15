@@ -5,44 +5,43 @@ import { cors } from "middy/middlewares";
 
 import { UpdateTaskRequest } from "../../../requests/UpdateTaskRequest";
 import { updateTask, taskExists } from "../../../businessLogic/tasks";
-import { projectExists } from "../../../businessLogic/projects";
 import { getUserId } from "../../../auth/utils";
+import { projectExists } from "../../../businessLogic/projects";
 
 export const handler = middy(
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     console.log("Updating task", event);
 
+    const updatedTask: UpdateTaskRequest = JSON.parse(event.body);
     const userId = getUserId(event);
-    const projectId = event.pathParameters.projectId;
 
-    const validProjectId = await projectExists(projectId);
+    const validProjectId = await projectExists(updatedTask.projectId);
     if (!validProjectId) {
       return {
         statusCode: 404,
         body: JSON.stringify({
-          error: `Project with id ${projectId} not found`
+          error: `Project with id ${updatedTask.projectId} not found`
         })
       };
     }
 
     const taskId = event.pathParameters.taskId;
-    const validTaskId = await taskExists(projectId, taskId);
+    const validTaskId = await taskExists(taskId);
     if (!validTaskId) {
       return {
         statusCode: 404,
         body: JSON.stringify({
-          error: `Task of ${projectId} with id ${taskId} not found`
+          error: `Task with id ${taskId} not found`
         })
       };
     }
 
-    const updatedTask: UpdateTaskRequest = JSON.parse(event.body);
-    await updateTask(updatedTask, projectId, taskId, userId);
+    await updateTask(updatedTask, taskId, userId);
 
     return {
       statusCode: 200,
       body: JSON.stringify({
-        message: `Task of ${projectId} with id ${taskId} updated`
+        message: `Task with id ${taskId} updated`
       })
     };
   }

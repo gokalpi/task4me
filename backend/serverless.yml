@@ -10,8 +10,8 @@ plugins:
   - serverless-dynamodb-local
   - serverless-offline
 
-package:
-  individually: true
+# package:
+#   individually: true
 
 provider:
   name: aws
@@ -30,7 +30,8 @@ provider:
   environment:
     PROJECTS_TABLE: Task4Me-Projects-${self:provider.stage}
     TASKS_TABLE: Task4Me-Tasks-${self:provider.stage}
-    PROJECTID_USERID_INDEX: ProjectIdUserIdIndex
+    PROJECT_USERID_INDEX: ProjectUserIdIndex
+    TASK_USERID_PROJECTID_INDEX: TaskUserIdProjectIdIndex
     IMAGES_S3_BUCKET: task4me-images-gokalpi-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 300
 
@@ -91,14 +92,14 @@ functions:
           cors: true
           authorizer: Auth
           documentation:
-            summary: Getting all projects
-            description: Getting all projects
+            summary: Getting all projects of user
+            description: Getting all projects of user
     iamRoleStatementsInherit: true
     iamRoleStatements:
       - Effect: Allow
         Action:
-          - dynamodb:Scan
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PROJECTS_TABLE}
+          - dynamodb:Query
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PROJECTS_TABLE}/index/${self:provider.environment.PROJECT_USERID_INDEX}
 
   GetProject:
     handler: src/lambda/http/projects/getProject.handler
@@ -174,8 +175,8 @@ functions:
           - dynamodb:DeleteItem
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PROJECTS_TABLE}
 
-  GetAllTasks:
-    handler: src/lambda/http/tasks/getAllTasks.handler
+  getProjectTasks:
+    handler: src/lambda/http/projects/getProjectTasks.handler
     events:
       - http:
           method: get
@@ -194,14 +195,14 @@ functions:
       - Effect: Allow
         Action:
           - dynamodb:Query
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TASKS_TABLE}
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TASKS_TABLE}/index/${self:provider.environment.TASK_USERID_PROJECTID_INDEX}
 
   GetTask:
     handler: src/lambda/http/tasks/getTask.handler
     events:
       - http:
           method: get
-          path: projects/{projectId}/tasks/{taskId}
+          path: tasks/{taskId}
           cors: true
           authorizer: Auth
     iamRoleStatementsInherit: true
@@ -216,7 +217,7 @@ functions:
     events:
       - http:
           method: post
-          path: projects/{projectId}/tasks
+          path: tasks
           cors: true
           authorizer: Auth
           reqValidatorName: RequestBodyValidator
@@ -241,7 +242,7 @@ functions:
     events:
       - http:
           method: put
-          path: projects/{projectId}/tasks/{taskId}
+          path: tasks/{taskId}
           cors: true
           authorizer: Auth
           reqValidatorName: RequestBodyValidator
@@ -267,15 +268,11 @@ functions:
     events:
       - http:
           method: delete
-          path: projects/{projectId}/tasks/{taskId}
+          path: tasks/{taskId}
           cors: true
           authorizer: Auth
     iamRoleStatementsInherit: true
     iamRoleStatements:
-      - Effect: Allow
-        Action:
-          - dynamodb:GetItem
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PROJECTS_TABLE}
       - Effect: Allow
         Action:
           - dynamodb:GetItem
@@ -287,15 +284,11 @@ functions:
     events:
       - http:
           method: post
-          path: projects/{projectId}/tasks/{taskId}/attachment
+          path: tasks/{taskId}/attachment
           cors: true
           authorizer: Auth
     iamRoleStatementsInherit: true
     iamRoleStatements:
-      - Effect: Allow
-        Action:
-          - dynamodb:GetItem
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PROJECTS_TABLE}
       - Effect: Allow
         Action:
           - dynamodb:GetItem
@@ -323,40 +316,47 @@ resources:
       Type: AWS::DynamoDB::Table
       Properties:
         AttributeDefinitions:
-          - AttributeName: id
-            AttributeType: S
-        KeySchema:
-          - AttributeName: id
-            KeyType: HASH
-        BillingMode: PAY_PER_REQUEST
-        TableName: ${self:provider.environment.PROJECTS_TABLE}
-
-    TasksTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        AttributeDefinitions:
           - AttributeName: projectId
-            AttributeType: S
-          - AttributeName: taskId
             AttributeType: S
           - AttributeName: userId
             AttributeType: S
         KeySchema:
           - AttributeName: projectId
             KeyType: HASH
-          - AttributeName: taskId
-            KeyType: RANGE
-        BillingMode: PAY_PER_REQUEST
-        TableName: ${self:provider.environment.TASKS_TABLE}
-        LocalSecondaryIndexes:
-          - IndexName: ${self:provider.environment.PROJECTID_USERID_INDEX}
+        GlobalSecondaryIndexes:
+          - IndexName: ${self:provider.environment.PROJECT_USERID_INDEX}
             KeySchema:
-              - AttributeName: projectId
-                KeyType: HASH
               - AttributeName: userId
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+        BillingMode: PAY_PER_REQUEST
+        TableName: ${self:provider.environment.PROJECTS_TABLE}
+
+    TasksDynamoDBTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: taskId
+            AttributeType: S
+          - AttributeName: userId
+            AttributeType: S
+          - AttributeName: projectId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: taskId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: ${self:provider.environment.TASK_USERID_PROJECTID_INDEX}
+            KeySchema:
+              - AttributeName: userId
+                KeyType: HASH
+              - AttributeName: projectId
                 KeyType: RANGE
             Projection:
               ProjectionType: ALL
+        BillingMode: PAY_PER_REQUEST
+        TableName: ${self:provider.environment.TASKS_TABLE}
 
     RequestBodyValidator:
       Type: AWS::ApiGateway::RequestValidator

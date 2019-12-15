@@ -7,14 +7,16 @@ import { UpdateProjectRequest } from "../requests/UpdateProjectRequest";
 
 const projectAccess = new ProjectAccess();
 
-export async function getProjectById(id: string): Promise<Project> {
-  if (!id) throw new Error("No id found");
+export async function getProjectById(projectId: string): Promise<Project> {
+  if (!projectId) throw new Error("No projectId found");
 
-  return await projectAccess.getProjectById(id);
+  return await projectAccess.getProjectById(projectId);
 }
 
-export async function getAllProjects() {
-  return await projectAccess.getAllProjects();
+export async function getAllProjectsByUser(userId: string) {
+  if (!userId) throw new Error("No userId found");
+
+  return await projectAccess.getAllProjectsByUser(userId);
 }
 
 export async function createProject(
@@ -24,7 +26,8 @@ export async function createProject(
   if (!userId) throw new Error("No userId found");
   
   const newProject = {
-    id: uuid.v4(),
+    projectId: uuid.v4(),
+    userId,
     ...createProjectRequest,
     createdAt: new Date().toISOString(),
     createdBy: userId
@@ -37,23 +40,24 @@ export async function createProject(
 
 export async function updateProject(
   updateProjectRequest: UpdateProjectRequest,
-  id: string,
+  projectId: string,
   userId: string
 ) {
-  if (!id) throw new Error("No id found");
+  if (!projectId) throw new Error("No projectId found");
   if (!userId) throw new Error("No userId found");
 
-  await projectAccess.updateProject(id, userId, updateProjectRequest);
+  console.log("updateProject Business layer", updateProjectRequest, projectId, userId)
+  await projectAccess.updateProject(projectId, userId, updateProjectRequest);
 }
 
-export async function deleteProject(id: string) {
-  if (!id) throw new Error("No id found");
+export async function deleteProject(projectId: string) {
+  if (!projectId) throw new Error("No projectId found");
 
-  await projectAccess.deleteProject(id);
+  await projectAccess.deleteProject(projectId);
 }
 
-export async function projectExists(id: string): Promise<boolean> {
-  if (!id) throw new Error("No id found");
+export async function projectExists(projectId: string): Promise<boolean> {
+  if (!projectId) throw new Error("No projectId found");
 
-  return await projectAccess.projectExists(id);
+  return await projectAccess.projectExists(projectId);
 }

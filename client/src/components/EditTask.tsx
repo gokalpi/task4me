@@ -49,7 +49,7 @@ export class EditTask extends React.PureComponent<EditTaskProps, EditTaskState> 
       }
 
       this.setUploadState(UploadState.FetchingPresignedUrl)
-      const uploadUrl = await getUploadUrl(this.props.auth.getIdToken(), this.props.match.params.projectId, this.props.match.params.taskId)
+      const uploadUrl = await getUploadUrl(this.props.auth.getIdToken(), this.props.match.params.taskId)
 
       this.setUploadState(UploadState.UploadingFile)
       await uploadFile(uploadUrl, this.state.file)
