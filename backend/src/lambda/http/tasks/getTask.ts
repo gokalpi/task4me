@@ -4,21 +4,19 @@ import * as middy from "middy";
 import { cors } from "middy/middlewares";
 
 import { getTaskById } from "../../../businessLogic/tasks";
-import { projectExists } from "../../../businessLogic/projects";
 
 export const handler = middy(
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     console.log("Getting task", event);
-    const projectId = event.pathParameters.projectId;
     const taskId = event.pathParameters.taskId;
 
-    const task = await getTaskById(projectId, taskId);
+    const task = await getTaskById(taskId);
 
     if (!task) {
       return {
         statusCode: 404,
         body: JSON.stringify({
-          error: `Task of project ${projectId} with id ${taskId} not found`
+          error: `Task with id ${taskId} not found`
         })
       };
     }

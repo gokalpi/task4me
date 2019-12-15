@@ -11,7 +11,12 @@ import { JwtPayload } from "./JwtPayload";
 export function parseUserId(jwtToken: string): string {
   if (!jwtToken) new Error("No token found");
 
+  console.log("parseUserId", jwtToken);
+
   const decodedJwt = decode(jwtToken) as JwtPayload;
+
+  console.log("decodedJwt", decodedJwt);
+
   return decodedJwt.sub;
 }
 
@@ -40,6 +45,8 @@ export function certToPEM(cert) {
 
 export function getTokenFromAuthorization(authorization: string) {
   if (!authorization) throw new Error("Not authorized");
+
+  console.log("getTokenFromAuthorization", authorization);
 
   const split = authorization.split(" ");
   const jwtToken = split[1];

@@ -63,7 +63,7 @@ export class Projects extends React.PureComponent<
       await deleteProject(this.props.auth.getIdToken(), projectId);
       this.setState({
         projects: this.state.projects.filter(
-          project => project.id !== projectId
+          project => project.projectId !== projectId
         )
       });
     } catch {
@@ -145,7 +145,7 @@ export class Projects extends React.PureComponent<
       <Card.Group>
         {this.state.projects.map((project) => {
           return (
-            <Card key={project.id}>
+            <Card key={project.projectId}>
               <Card.Content>
                 <Card.Header>{project.name}</Card.Header>
                 <Card.Meta>
@@ -162,10 +162,10 @@ export class Projects extends React.PureComponent<
               </Card.Content>
               <Card.Content extra>
                 <div className="ui two buttons">
-                  <Button icon color="blue" onClick={() => this.onEditButtonClick(project.id)}>
+                  <Button icon color="blue" onClick={() => this.onEditButtonClick(project.projectId)}>
                     <Icon name="pencil" /> Edit
                   </Button>
-                  <Button icon color="red" onClick={() => this.onProjectDelete(project.id)}>
+                  <Button icon color="red" onClick={() => this.onProjectDelete(project.projectId)}>
                     <Icon name="delete" /> Delete
                   </Button>
                 </div>

@@ -3,6 +3,9 @@
   "title": "task",
   "type": "object",
   "properties": {
+    "projectId": {
+      "type": "string"
+    },
     "name": {
       "type": "string"
     },
@@ -13,6 +16,6 @@
       "type": "boolean"
     }
   },
-  "required": ["name", "dueDate", "done"],
+  "required": ["projectId", "name", "dueDate", "done"],
   "additionalProperties": false
 }

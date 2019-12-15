@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "0f8aa815-5d74-41e7-946f-23adfb18f9f0",
+		"_postman_id": "cca7a320-10c2-4e0e-8e57-b29004cd24a5",
 		"name": "Udacity Project Task Management",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -86,7 +86,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"name\": \"Test project 2\",\n\t\"description\": \"Test project 2\"\n}",
+							"raw": "{\n\t\"name\": \"Node.js 8.10 upgrade\",\n\t\"description\": \"Node.js 8.10 upgrade to Node.js 12.x\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -138,7 +138,7 @@
 							}
 						},
 						"url": {
-							"raw": "https://{{apiId}}.execute-api.{{regionId}}.amazonaws.com/dev/projects/17ea8047-5d97-49e1-827b-6dced7ee9bd4",
+							"raw": "https://{{apiId}}.execute-api.{{regionId}}.amazonaws.com/dev/projects/710fc251-d0f9-4e6b-b80a-0627f4edc210",
 							"protocol": "https",
 							"host": [
 								"{{apiId}}",
@@ -150,7 +150,7 @@
 							"path": [
 								"dev",
 								"projects",
-								"17ea8047-5d97-49e1-827b-6dced7ee9bd4"
+								"710fc251-d0f9-4e6b-b80a-0627f4edc210"
 							]
 						}
 					},
@@ -420,19 +420,19 @@
 	],
 	"variable": [
 		{
-			"id": "580f170e-a539-4b03-9347-fd25cac802a2",
+			"id": "e5623938-ea20-4fe0-b927-624135a87655",
 			"key": "apiId",
-			"value": "xbhf0fkrv7",
+			"value": "y7u6eu0d84",
 			"type": "string"
 		},
 		{
-			"id": "936414d8-c35b-4412-a167-47295ed3781c",
+			"id": "52fbfdc7-6d48-4a2f-aec5-a4e5f030b303",
 			"key": "authToken",
-			"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6Ik5UZEZNa0U1TjBVNVFUWTRRekF6UWpNeU1EZ3dNVVV5TlRneFJUY3lRMEkxUkVFeE9EazVNZyJ9.eyJpc3MiOiJodHRwczovL2Rldi1sc3V0dmd3eS5hdXRoMC5jb20vIiwic3ViIjoiYXV0aDB8NWRkZTQ2NTYwMzY0NjAwZDJlMmI5ZjgzIiwiYXVkIjoiQkJoVWYzMkJ4SHZORWpuUUhiQzlta1dEdlI4TWFJTDYiLCJpYXQiOjE1NzYwNTI1NjgsImV4cCI6MTU3NjA4ODU2OCwiYXRfaGFzaCI6IjZsQWllSEtFYlJ4NFJQeDlaV1Z3cVEiLCJub25jZSI6IklLZEgybmdtZzBPYjNPT1FxT2NoRzF2UE5EVDkySVp1In0.TOIp3tSbwGYVibeYtPyCu6gE521h4PaKiiRAAxfl5Mp1ZWJj5X5BGWGyYTxF5Heodvgh2nPUNWLvkRz9uT4G4PNeNMuhj-Viaz33RbmETcQ-ArSXawE4VZy7_c2sgJ2f90zRuWCkveDh-UEhzfN29BoTH5ItNSvbFgNK71DWabVvycP1gNDEiG6JqPrbxfbROATWb2v3iN9Hnq-nSaUekQxvhkRmMo_GKalkFwsxUlEr0sUvpaTEYL-YW-O5eP6leVMHzWZSWn3XNdZwK4h1mYvTcwxNrb8GNSFjsFbFlriFd5G1NxE4V5mip-ovlwrgZN3WM8fwTnBTFeDI31A-1A",
+			"value": "",
 			"type": "string"
 		},
 		{
-			"id": "1b10589b-2dc2-478d-bb73-2fc0b7634cb3",
+			"id": "8140a9f9-526c-4bcc-979e-459190725d5b",
 			"key": "regionId",
 			"value": "eu-central-1",
 			"type": "string"

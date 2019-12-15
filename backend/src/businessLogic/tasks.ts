@@ -9,29 +9,24 @@ import { getSignedUrl, getAttachmentUrl } from "../utils/s3Utils";
 const taskAccess = new TaskAccess();
 
 export async function getTaskById(
-  projectId: string,
   taskId: string
 ): Promise<Task> {
-  if (!projectId) throw new Error("No projectId found");
   if (!taskId) throw new Error("No taskId found");
 
-  return await taskAccess.getTaskById(projectId, taskId);
+  return await taskAccess.getTaskById(taskId);
 }
 
-export async function getAllTasksByProject(projectId: string) {
-  return await taskAccess.getAllTasksByProject(projectId);
+export async function getAllUserTasksByProject(userId: string, projectId: string) {
+  return await taskAccess.getAllUserTasksByProject(userId, projectId);
 }
 
 export async function createTask(
   createTaskRequest: CreateTaskRequest,
-  projectId: string,
   userId: string
 ): Promise<Task> {
-  if (!projectId) throw new Error("No projectId found");
   if (!userId) throw new Error("No userId found");
 
   const newTask = {
-    projectId,
     taskId: uuid.v4(),
     userId,
     ...createTaskRequest,
@@ -40,51 +35,42 @@ export async function createTask(
     createdBy: userId
   };
 
-  await taskAccess.createTask(projectId, newTask);
+  await taskAccess.createTask(newTask);
 
   return newTask;
 }
 
 export async function updateTask(
   updateTaskRequest: UpdateTaskRequest,
-  projectId: string,
   taskId: string,
   userId: string
 ) {
-  if (!projectId) throw new Error("No projectId found");
   if (!taskId) throw new Error("No taskId found");
 
-  await taskAccess.updateTask(projectId, taskId, userId, updateTaskRequest);
+  await taskAccess.updateTask(taskId, userId, updateTaskRequest);
 }
 
-export async function deleteTask(projectId: string, taskId: string) {
-  if (!projectId) throw new Error("No projectId found");
+export async function deleteTask(taskId: string) {
   if (!taskId) throw new Error("No taskId found");
 
-  await taskAccess.deleteTask(projectId, taskId);
+  await taskAccess.deleteTask(taskId);
 }
 
 export async function taskExists(
-  projectId: string,
   taskId: string
 ): Promise<boolean> {
-  if (!projectId) throw new Error("No projectId found");
   if (!taskId) throw new Error("No taskId found");
 
-  return await taskAccess.taskExists(projectId, taskId);
+  return await taskAccess.taskExists(taskId);
 }
 
-export async function generateAttachmentUrl(projectId: string, taskId: string) {
-  if (!projectId) throw new Error("No projectId found");
+export async function generateAttachmentUrl(taskId: string) {
   if (!taskId) throw new Error("No taskId found");
 
-  const signedUrl = await getSignedUrl(taskId);
-  console.log('Signed URL', signedUrl)
+  const signedUrl = await getSignedUrl(taskId)
   const downloadUrl = await getAttachmentUrl(taskId);
-  console.log('Download URL', downloadUrl)
 
   await taskAccess.updateAttachmentUrl(
-    projectId,
     taskId,
     downloadUrl
   );

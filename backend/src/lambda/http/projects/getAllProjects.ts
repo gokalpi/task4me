@@ -3,13 +3,15 @@ import "source-map-support/register";
 import * as middy from "middy";
 import { cors } from "middy/middlewares";
 
-import { getAllProjects } from "../../../businessLogic/projects";
+import { getAllProjectsByUser } from "../../../businessLogic/projects";
+import { getUserId } from "../../../auth/utils";
 
 export const handler = middy(
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     console.log("Getting all projects", event);
 
-    const projects = await getAllProjects();
+    const userId = getUserId(event);
+    const projects = await getAllProjectsByUser(userId);
 
     return {
       statusCode: 200,

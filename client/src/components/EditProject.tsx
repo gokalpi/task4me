@@ -5,7 +5,8 @@ import { Form, Button, Input, Grid, Loader, Icon, Divider, Checkbox, Image } fro
 
 import Auth from '../auth/Auth'
 import { Task } from '../types/Task'
-import { createTask, deleteTask, getTasks, patchTask } from '../api/tasks-api'
+import { createTask, deleteTask, updateTask } from '../api/tasks-api'
+import { getProject, updateProject, getProjectTasks } from '../api/projects-api';
 
 interface EditProjectProps {
   match: {
@@ -18,6 +19,11 @@ interface EditProjectProps {
 }
 
 interface EditProjectState {
+  projectId: string,
+  project: any;
+  newProjectName: string;
+  newDescription?: string;
+  submitSuccess: boolean;
   tasks: Task[];
   newTaskName: string;
   newDueDate: string;
@@ -26,13 +32,26 @@ interface EditProjectState {
 
 export class EditProject extends React.PureComponent<EditProjectProps, EditProjectState> {
   state: EditProjectState = {
+    projectId: this.props.match.params.projectId,
+    project: {},
+    newProjectName: "",
+    newDescription: "",
     tasks: [],
     newTaskName: "",
     newDueDate: "",
-    loadingTasks: true
+    loadingTasks: true,
+    submitSuccess: false
   }
 
-  handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  handleProjectNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({ newProjectName: event.target.value });
+  };
+
+  handleDescriptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({ newDescription: event.target.value });
+  };
+
+  handleTaskNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({ newTaskName: event.target.value });
   };
 
@@ -44,11 +63,35 @@ export class EditProject extends React.PureComponent<EditProjectProps, EditProje
     this.props.history.push(`/projects/${projectId}/tasks/${taskId}/edit`)
   }
 
+  onProjectUpdate = async () => {
+    try {
+      await updateProject(this.props.auth.getIdToken(),
+        this.props.match.params.projectId,
+        {
+          name: this.state.newProjectName,
+          description: this.state.newDescription
+        });
+
+      this.setState({
+        newProjectName: "",
+        newDescription: ""
+      });
+
+      alert("Project updated");
+
+    // setTimeout(() => {
+    //   this.props.history.push("/");
+    // }, 1500);
+  } catch {
+      alert("Project update failed");
+    }
+  };
+
   onTaskCreate = async () => {
     try {
       const newTask = await createTask(this.props.auth.getIdToken(),
-        this.props.match.params.projectId,
         {
+          projectId: this.props.match.params.projectId,
           name: this.state.newTaskName,
           dueDate: this.state.newDueDate
         });
@@ -65,7 +108,7 @@ export class EditProject extends React.PureComponent<EditProjectProps, EditProje
 
   onTaskDelete = async (taskId: string) => {
     try {
-      await deleteTask(this.props.auth.getIdToken(), this.props.match.params.projectId, taskId);
+      await deleteTask(this.props.auth.getIdToken(), taskId);
       this.setState({
         tasks: this.state.tasks.filter(
           task => task.taskId !== taskId
@@ -79,7 +122,8 @@ export class EditProject extends React.PureComponent<EditProjectProps, EditProje
   onTaskCheck = async (pos: number) => {
     try {
       const task = this.state.tasks[pos]
-      await patchTask(this.props.auth.getIdToken(), task.projectId, task.taskId, {
+      await updateTask(this.props.auth.getIdToken(), task.taskId, {
+        projectId: task.projectId,
         name: task.name,
         dueDate: task.dueDate,
         done: !task.done
@@ -89,6 +133,7 @@ export class EditProject extends React.PureComponent<EditProjectProps, EditProje
           [pos]: { done: { $set: !task.done } }
         })
       })
+      alert('Task status changed')
     } catch {
       alert('Task status change failed')
     }
@@ -96,8 +141,14 @@ export class EditProject extends React.PureComponent<EditProjectProps, EditProje
 
   async componentDidMount() {
     try {
-      const tasks = await getTasks(this.props.auth.getIdToken(), this.props.match.params.projectId);
+      const idToken = this.props.auth.getIdToken();
+      const project = await getProject(idToken, this.state.projectId);
+      console.log("Project found", project);
+      const tasks = await getProjectTasks(idToken, this.state.projectId);
       this.setState({
+        project,
+        newProjectName: project.name,
+        newDescription: project.description,
         tasks,
         loadingTasks: false
       });
@@ -109,12 +160,16 @@ export class EditProject extends React.PureComponent<EditProjectProps, EditProje
   render() {
     return (
       <div>
+        <h1>Project</h1>
+
+        {this.renderProjectEditForm()}
+
         <h1>Tasks</h1>
 
         <Grid>
           <Grid.Row>
             <Grid.Column width={16}>
-              {this.renderCreateTaskInput()}
+              {this.renderTaskCreateForm()}
             </Grid.Column>
           </Grid.Row>
           <Grid.Row>
@@ -127,13 +182,31 @@ export class EditProject extends React.PureComponent<EditProjectProps, EditProje
     )
   }
 
-  renderCreateTaskInput() {
+  renderProjectEditForm() {
+    return (
+      <Form key="project-edit-form" noValidate={true}>
+        <Form.Group widths="equal">
+          <Form.Field required>
+            <label>Name</label>
+            <Input fluid placeholder="Project name" defaultValue={this.state.project.name} onChange={this.handleProjectNameChange} />
+          </Form.Field>
+          <Form.Field>
+            <label>Description</label>
+            <Input fluid placeholder="Project Description" defaultValue={this.state.project.description} onChange={this.handleDescriptionChange} />
+          </Form.Field>
+        </Form.Group>
+        <Form.Field control={Button} onClick={this.onProjectUpdate}>Update Project</Form.Field>
+      </Form>
+    );
+  }
+
+  renderTaskCreateForm() {
     return (
       <Form>
         <Form.Group widths="equal">
           <Form.Field required>
             <label>Name</label>
-            <Input fluid placeholder="Task name" onChange={this.handleNameChange} />
+            <Input fluid placeholder="Task name" onChange={this.handleTaskNameChange} />
           </Form.Field>
           <Form.Field required>
             <label>Due Date</label>

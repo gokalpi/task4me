@@ -10,7 +10,7 @@ export const handler = middy(
     console.log("Getting project", event);
     const projectId = event.pathParameters.projectId;
 
-    console.log(`Getting project ${projectId}`);
+    console.log(`Getting project with id ${projectId}`);
     const project = await getProjectById(projectId);
 
     if (!project) {
